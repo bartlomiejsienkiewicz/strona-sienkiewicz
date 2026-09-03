@@ -587,5 +587,24 @@ function sortedArticles(){
 })();
 </script>
 <script src="/common.js"></script>
+
+<!-- ================================================================
+     NETLIFY IDENTITY — wymagane, żeby linki z zaproszenia/logowania
+     do panelu edytora (/admin) działały poprawnie. Bez tego skryptu
+     link z maila zaproszenia po prostu ładuje zwykłą stronę główną,
+     bez okienka do ustawienia hasła.
+     ================================================================ -->
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script>
+  if (window.netlifyIdentity) {
+    window.netlifyIdentity.on('init', user => {
+      if (!user) {
+        window.netlifyIdentity.on('login', () => {
+          document.location.href = '/admin/';
+        });
+      }
+    });
+  }
+</script>
 </body>
 </html>
