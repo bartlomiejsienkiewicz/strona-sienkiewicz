@@ -1,0 +1,45 @@
+# ============================================================
+# Konfiguracja edytora bloga (Decap CMS)
+# Dokumentacja: https://decapcms.org/docs/configuration-options/
+# ============================================================
+
+backend:
+  name: git-gateway
+  branch: main
+
+# Pliki dodawane w edytorze (np. zdjęcia do artykułów) trafiają tutaj:
+media_folder: "uploads"
+public_folder: "/uploads"
+
+# Panel logowania — obsługiwane przez Netlify Identity (patrz instrukcja wdrożenia)
+site_url: https://www.bsienkiewicz.pl
+
+collections:
+  - name: "articles"
+    label: "Blog — Polityka pod Dywanem"
+    label_singular: "Odcinek"
+    files:
+      - name: "articles"
+        label: "Wszystkie odcinki"
+        file: "articles.json"
+        format: "json"
+        fields:
+          - name: "items"
+            label: "Odcinki"
+            widget: "list"
+            label_singular: "Odcinek"
+            summary: "{{fields.date}} — {{fields.title}}"
+            fields:
+              - {label: "Tytuł", name: "title", widget: "string"}
+              - {label: "Data publikacji (DD.MM.RRRR)", name: "date", widget: "string", hint: "np. 23.07.2026 — odcinek sam ustawi się na górze bloga jako najnowszy."}
+              - {label: "Adres artykułu (slug)", name: "slug", widget: "string", hint: "Tylko małe litery, cyfry i myślniki, bez ogonków. Musi być unikalny, np. nowa-strategia-antynarkotykowa-ue."}
+              - {label: "Zajawka (1–2 zdania na kafelku)", name: "excerpt", widget: "text"}
+              - label: "Zdjęcie do artykułu (opcjonalnie)"
+                name: "coverImage"
+                widget: "image"
+                required: false
+                hint: "Wgraj zdjęcie, a potem wklej jego ścieżkę w treści artykułu jako: <img src=\"/uploads/nazwa-pliku.jpg\" alt=\"opis zdjęcia\">"
+              - label: "Treść artykułu (HTML)"
+                name: "body"
+                widget: "text"
+                hint: "Każdy akapit w znacznikach <p>…</p>. Śródtytuły <h2>…</h2>, pogrubienie <strong>…</strong>, cytat <p class=\"pullquote\">…</p>. Zdjęcie: <img src=\"/uploads/nazwa-pliku.jpg\" alt=\"opis\">."
