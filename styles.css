@@ -417,7 +417,7 @@ a:hover{ text-decoration:underline; text-underline-offset:3px; }
 /* Kontener „przycinający” wtyczkę FB: pokazujemy tylko siatkę postów, a własny (niestabilny)
    nagłówek wtyczki chowamy nad widocznym obszarem przez ujemny margines na iframe. */
 .fb-crop{ position:relative; overflow:hidden; height:520px; }
-.fb-crop iframe{ display:block; width:100%; border:0; position:absolute; top:-190px; left:0; }
+.fb-crop iframe{ display:block; width:100%; border:0; position:absolute; top:-165px; left:0; }
 .fb-placeholder{
   display:grid; place-items:center; text-align:center; padding:2.5rem 1.5rem; min-height:300px; color:var(--muted);
 }
