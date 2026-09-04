@@ -419,16 +419,11 @@ a:hover{ text-decoration:underline; text-underline-offset:3px; }
 .fb-own-header .fb-logo svg{ width:100%; height:100%; }
 .fb-own-header span.label{ flex:1; }
 .fb-own-header .arrow{ width:15px; height:15px; flex:0 0 auto; opacity:.85; }
-/* Kontener wtyczki FB: stała widoczna wysokość, bez przewijania na zewnątrz.
-   Nasz pasek (powyżej) leży NA WIERZCHU tej ramki i zakrywa jej górną część —
-   to co jest pod spodem (nagłówek wtyczki Facebooka) jest po prostu niewidoczne. */
-.fb-crop{ position:relative; overflow:hidden; height:380px; }
-.fb-crop iframe{
-  display:block; width:100%; height:100%; border:0;
-  /* Blokuje przewijanie WEWNĄTRZ ramki Facebooka (myszką i dotykiem) — bez tego przewijanie
-     nad widżetem porusza treścią w środku iframe'a zamiast naszą stroną. */
-  touch-action:none;
-}
+/* Kontener wtyczki FB: stała widoczna wysokość. Nasz pasek (powyżej) leży NA WIERZCHU tej
+   ramki i zakrywa jej górną część niezależnie od przewijania w środku — dlatego przewijanie
+   wewnątrz widgetu (żeby doładować więcej postów) jest bezpieczne i dozwolone. */
+.fb-crop{ position:relative; overflow:hidden; height:620px; }
+.fb-crop iframe{ display:block; width:100%; height:100%; border:0; }
 .fb-placeholder{
   display:grid; place-items:center; text-align:center; padding:2.5rem 1.5rem; min-height:300px; color:var(--muted);
 }
