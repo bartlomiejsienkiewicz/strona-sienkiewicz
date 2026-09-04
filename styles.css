@@ -406,18 +406,24 @@ a:hover{ text-decoration:underline; text-underline-offset:3px; }
    potrafi się źle składać przy jej własnym nagłówku, więc go nie używamy i wycinamy go —
    patrz .fb-crop poniżej). */
 .fb-own-header{
-  display:flex; align-items:center; gap:.7rem; padding:.9rem 1.1rem;
-  background:#1877F2; color:#fff; text-decoration:none; font-weight:600; font-size:.98rem;
+  display:flex; align-items:center; gap:.4rem; padding:.4rem .65rem;
+  background:#1877F2; color:#fff; text-decoration:none; font-weight:600; font-size:.74rem;
 }
 .fb-own-header:hover{ background:#166fe0; text-decoration:none; }
-.fb-own-header .fb-logo{ width:24px; height:24px; flex:0 0 auto; }
+.fb-own-header .fb-logo{ width:14px; height:14px; flex:0 0 auto; }
 .fb-own-header .fb-logo svg{ width:100%; height:100%; }
 .fb-own-header span.label{ flex:1; }
-.fb-own-header .arrow{ width:18px; height:18px; flex:0 0 auto; opacity:.85; }
+.fb-own-header .arrow{ width:13px; height:13px; flex:0 0 auto; opacity:.85; }
 /* Kontener „przycinający” wtyczkę FB: pokazujemy tylko siatkę postów, a własny (niestabilny)
    nagłówek wtyczki chowamy nad widocznym obszarem przez ujemny margines na iframe. */
 .fb-crop{ position:relative; overflow:hidden; height:520px; }
-.fb-crop iframe{ display:block; width:100%; border:0; position:absolute; top:-165px; left:0; }
+.fb-crop iframe{
+  display:block; width:100%; border:0; position:absolute; top:-165px; left:0;
+  /* Blokuje przewijanie dotykiem WEWNĄTRZ ramki Facebooka na telefonie/tablecie —
+     bez tego przesuwanie palcem po widżecie i tak przewija treść w środku iframe'a
+     (inny mechanizm niż scroll myszką na komputerze), odkrywając ich schowany nagłówek. */
+  touch-action:none;
+}
 .fb-placeholder{
   display:grid; place-items:center; text-align:center; padding:2.5rem 1.5rem; min-height:300px; color:var(--muted);
 }
