@@ -569,10 +569,13 @@ function sortedArticles(){
     // Dopasuj szerokość widżetu Facebooka do faktycznej szerokości kontenera (min 280, max 500 — limity wtyczki FB),
     // żeby treść w środku iframe'a nigdy nie była szersza niż ramka, w której się wyświetla (co powodowało ucinanie z prawej strony).
     const w = Math.max(280, Math.min(500, Math.round(box.clientWidth) || 500));
+    // small_header=true — kompaktowy, jednowierszowy nagłówek (awatar + nazwa + przyciski obok siebie).
+    // Duży nagłówek (small_header=false) potrafi się źle składać przy niestandardowych szerokościach
+    // i ucinać liczbę obserwujących — kompaktowy wariant jest znacznie stabilniejszy.
     const src = 'https://www.facebook.com/plugins/page.php'
       + '?href=' + encodeURIComponent(CONFIG.facebookPage)
-      + '&tabs=timeline&width=' + w + '&height=600&small_header=false'
-      + '&adapt_container_width=true&hide_cover=false&show_facepile=true';
+      + '&tabs=timeline&width=' + w + '&height=600&small_header=true'
+      + '&adapt_container_width=true&hide_cover=true&show_facepile=false';
     box.innerHTML = '';
     const ifr = document.createElement('iframe');
     ifr.src = src;
