@@ -422,7 +422,7 @@ a:hover{ text-decoration:underline; text-underline-offset:3px; }
 /* Kontener wtyczki FB: stała widoczna wysokość, bez przewijania na zewnątrz.
    Nasz pasek (powyżej) leży NA WIERZCHU tej ramki i zakrywa jej górną część —
    to co jest pod spodem (nagłówek wtyczki Facebooka) jest po prostu niewidoczne. */
-.fb-crop{ position:relative; overflow:hidden; height:520px; }
+.fb-crop{ position:relative; overflow:hidden; height:380px; }
 .fb-crop iframe{
   display:block; width:100%; height:100%; border:0;
   /* Blokuje przewijanie WEWNĄTRZ ramki Facebooka (myszką i dotykiem) — bez tego przewijanie

@@ -581,7 +581,7 @@ function sortedArticles(){
     // Wtyczka renderuje się normalnie, od góry (razem ze swoim własnym, niestabilnym nagłówkiem) —
     // ale nasz pasek (.fb-own-header w HTML/CSS) leży NA WIERZCHU jako nieprzezroczysta nakładka
     // i po prostu go zakrywa. Wysokość widoczna ustawiona w CSS (.fb-crop { height }).
-    const VISIBLE_HEIGHT = 520; // musi być zgodne z "height" w .fb-crop (styles.css)
+    const VISIBLE_HEIGHT = 380; // musi być zgodne z "height" w .fb-crop (styles.css)
     const src = 'https://www.facebook.com/plugins/page.php'
       + '?href=' + encodeURIComponent(CONFIG.facebookPage)
       + '&tabs=timeline&width=' + w + '&height=' + VISIBLE_HEIGHT + '&small_header=true'
