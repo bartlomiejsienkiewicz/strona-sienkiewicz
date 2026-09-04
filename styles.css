@@ -403,25 +403,30 @@ a:hover{ text-decoration:underline; text-underline-offset:3px; }
   box-shadow:var(--shadow); overflow:hidden; min-height:300px; width:500px; max-width:100%; margin-inline:auto;
 }
 /* Własny pasek nad wtyczką Facebooka — stabilny, w pełni pod naszą kontrolą (wtyczka FB
-   potrafi się źle składać przy jej własnym nagłówku, więc go nie używamy i wycinamy go —
-   patrz .fb-crop poniżej). */
+   potrafi się źle składać przy jej własnym nagłówku, więc go w ogóle nie pokazujemy: nasz
+   pasek leży NA WIERZCHU jako nieprzezroczysta nakładka, patrz .fb-stack/.fb-crop poniżej —
+   to jest odporne na przewijanie w środku ramki, bo nakładka trzyma pozycję niezależnie od
+   tego, co się dzieje wewnątrz iframe'a). */
+.fb-stack{ position:relative; }
 .fb-own-header{
-  display:flex; align-items:center; gap:.4rem; padding:.4rem .65rem;
-  background:#1877F2; color:#fff; text-decoration:none; font-weight:600; font-size:.74rem;
+  position:absolute; top:0; left:0; right:0; z-index:2; height:150px;
+  display:flex; align-items:center; gap:.5rem; padding:0 .8rem;
+  background:#1877F2; color:#fff; text-decoration:none; font-weight:600; font-size:.86rem;
+  box-shadow:0 1px 0 rgba(0,0,0,.06);
 }
 .fb-own-header:hover{ background:#166fe0; text-decoration:none; }
-.fb-own-header .fb-logo{ width:14px; height:14px; flex:0 0 auto; }
+.fb-own-header .fb-logo{ width:18px; height:18px; flex:0 0 auto; }
 .fb-own-header .fb-logo svg{ width:100%; height:100%; }
 .fb-own-header span.label{ flex:1; }
-.fb-own-header .arrow{ width:13px; height:13px; flex:0 0 auto; opacity:.85; }
-/* Kontener „przycinający” wtyczkę FB: pokazujemy tylko siatkę postów, a własny (niestabilny)
-   nagłówek wtyczki chowamy nad widocznym obszarem przez ujemny margines na iframe. */
+.fb-own-header .arrow{ width:15px; height:15px; flex:0 0 auto; opacity:.85; }
+/* Kontener wtyczki FB: stała widoczna wysokość, bez przewijania na zewnątrz.
+   Nasz pasek (powyżej) leży NA WIERZCHU tej ramki i zakrywa jej górną część —
+   to co jest pod spodem (nagłówek wtyczki Facebooka) jest po prostu niewidoczne. */
 .fb-crop{ position:relative; overflow:hidden; height:520px; }
 .fb-crop iframe{
-  display:block; width:100%; border:0; position:absolute; top:-165px; left:0;
-  /* Blokuje przewijanie dotykiem WEWNĄTRZ ramki Facebooka na telefonie/tablecie —
-     bez tego przesuwanie palcem po widżecie i tak przewija treść w środku iframe'a
-     (inny mechanizm niż scroll myszką na komputerze), odkrywając ich schowany nagłówek. */
+  display:block; width:100%; height:100%; border:0;
+  /* Blokuje przewijanie WEWNĄTRZ ramki Facebooka (myszką i dotykiem) — bez tego przewijanie
+     nad widżetem porusza treścią w środku iframe'a zamiast naszą stroną. */
   touch-action:none;
 }
 .fb-placeholder{
