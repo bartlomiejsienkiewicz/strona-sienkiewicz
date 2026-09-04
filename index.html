@@ -200,13 +200,20 @@
           </a>
         </div>
       </div>
-      <div class="fb-panel reveal" id="fb-embed">
-        <!-- Wypełniane automatycznie: patrz CONFIG.facebookPage w skrypcie poniżej -->
-        <div class="fb-placeholder">
-          <div>
-            <p style="margin:0 0 .3rem;font-weight:600;color:var(--navy);">Okno Facebooka</p>
-            <p style="margin:0;font-size:.94rem;">Pojawi się tu automatycznie po wpisaniu adresu strony na Facebooku w ustawieniach pliku.</p>
-            <span class="ph-chip">[PLACEHOLDER: adres strony na Facebooku]</span>
+      <div class="fb-panel reveal">
+        <a class="fb-own-header" href="https://www.facebook.com/SienkiewiczB" target="_blank" rel="noopener">
+          <span class="fb-logo"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12Z"/></svg></span>
+          <span class="label">Bartłomiej Sienkiewicz na Facebooku</span>
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <div class="fb-crop" id="fb-embed">
+          <!-- Wypełniane automatycznie: patrz CONFIG.facebookPage w skrypcie poniżej -->
+          <div class="fb-placeholder">
+            <div>
+              <p style="margin:0 0 .3rem;font-weight:600;color:var(--navy);">Okno Facebooka</p>
+              <p style="margin:0;font-size:.94rem;">Pojawi się tu automatycznie po wpisaniu adresu strony na Facebooku w ustawieniach pliku.</p>
+              <span class="ph-chip">[PLACEHOLDER: adres strony na Facebooku]</span>
+            </div>
           </div>
         </div>
       </div>
@@ -569,22 +576,22 @@ function sortedArticles(){
     // Dopasuj szerokość widżetu Facebooka do faktycznej szerokości kontenera (min 280, max 500 — limity wtyczki FB),
     // żeby treść w środku iframe'a nigdy nie była szersza niż ramka, w której się wyświetla (co powodowało ucinanie z prawej strony).
     const w = Math.max(280, Math.min(500, Math.round(box.clientWidth) || 500));
-    // small_header=true — kompaktowy nagłówek. Ważne: NIE ustawiamy adapt_container_width=true —
-    // ten parametr każe wtyczce Facebooka samodzielnie, dynamicznie zmieniać swój wewnętrzny układ
-    // (wymaga do tego oficjalnego SDK Facebooka z obsługą komunikacji przez postMessage). Bez SDK
-    // ten mechanizm wchodzi w konflikt z naszym własnym, jednorazowym ustawieniem szerokości w JS —
-    // wnętrze iframe'a próbuje się przeliczyć na nowo, a sam iframe tego nie odzwierciedla, co
-    // powodowało nakładającą się, ucinaną treść. Ustawiamy więc szerokość raz, z naszej strony,
-    // i na tym poprzestajemy.
+    // Własny nagłówek nad wtyczką (patrz .fb-own-header w HTML) zastępuje niestabilny nagłówek
+    // wtyczki FB. Sam nagłówek wtyczki zostaje "wycięty" wizualnie: prosimy o wysoki iframe
+    // (VISIBLE_HEIGHT + HEADER_CROP), a widoczny kontener (.fb-crop w CSS) ma stałą, mniejszą
+    // wysokość z overflow:hidden — ujemny margines/pozycja przesuwa treść w górę, chowając
+    // nagłówek wtyczki nad widocznym obszarem i zostawiając tylko siatkę postów.
+    const HEADER_CROP = 190;   // musi być zgodne z "top" w .fb-crop iframe (styles.css)
+    const VISIBLE_HEIGHT = 520; // musi być zgodne z "height" w .fb-crop (styles.css)
     const src = 'https://www.facebook.com/plugins/page.php'
       + '?href=' + encodeURIComponent(CONFIG.facebookPage)
-      + '&tabs=timeline&width=' + w + '&height=650&small_header=true'
-      + '&hide_cover=false&show_facepile=true';
+      + '&tabs=timeline&width=' + w + '&height=' + (VISIBLE_HEIGHT + HEADER_CROP) + '&small_header=true'
+      + '&hide_cover=true&show_facepile=false';
     box.innerHTML = '';
     const ifr = document.createElement('iframe');
     ifr.src = src;
     ifr.width = w;
-    ifr.height = 650;
+    ifr.height = VISIBLE_HEIGHT + HEADER_CROP;
     ifr.title = 'Facebook — najnowsze wpisy';
     ifr.loading = 'lazy';
     ifr.setAttribute('allow', 'autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share');
