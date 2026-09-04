@@ -402,7 +402,22 @@ a:hover{ text-decoration:underline; text-underline-offset:3px; }
   background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
   box-shadow:var(--shadow); overflow:hidden; min-height:300px; width:500px; max-width:100%; margin-inline:auto;
 }
-.fb-panel iframe{ display:block; width:100%; border:0; }
+/* Własny pasek nad wtyczką Facebooka — stabilny, w pełni pod naszą kontrolą (wtyczka FB
+   potrafi się źle składać przy jej własnym nagłówku, więc go nie używamy i wycinamy go —
+   patrz .fb-crop poniżej). */
+.fb-own-header{
+  display:flex; align-items:center; gap:.7rem; padding:.9rem 1.1rem;
+  background:#1877F2; color:#fff; text-decoration:none; font-weight:600; font-size:.98rem;
+}
+.fb-own-header:hover{ background:#166fe0; text-decoration:none; }
+.fb-own-header .fb-logo{ width:24px; height:24px; flex:0 0 auto; }
+.fb-own-header .fb-logo svg{ width:100%; height:100%; }
+.fb-own-header span.label{ flex:1; }
+.fb-own-header .arrow{ width:18px; height:18px; flex:0 0 auto; opacity:.85; }
+/* Kontener „przycinający” wtyczkę FB: pokazujemy tylko siatkę postów, a własny (niestabilny)
+   nagłówek wtyczki chowamy nad widocznym obszarem przez ujemny margines na iframe. */
+.fb-crop{ position:relative; overflow:hidden; height:520px; }
+.fb-crop iframe{ display:block; width:100%; border:0; position:absolute; top:-190px; left:0; }
 .fb-placeholder{
   display:grid; place-items:center; text-align:center; padding:2.5rem 1.5rem; min-height:300px; color:var(--muted);
 }
@@ -514,8 +529,8 @@ a:hover{ text-decoration:underline; text-underline-offset:3px; }
    PRZYCISKI PŁYWAJĄCE: „Do góry” i „Pokaż mniej”
    ============================================================ */
 .float-stack{
-  position:fixed; right:clamp(1rem,3vw,2rem); bottom:clamp(1rem,3vw,2rem);
-  display:flex; flex-direction:column; align-items:flex-end; gap:.7rem; z-index:60;
+  position:fixed; left:clamp(1rem,3vw,2rem); bottom:clamp(1rem,3vw,2rem);
+  display:flex; flex-direction:column; align-items:flex-start; gap:.7rem; z-index:60;
   pointer-events:none;
 }
 .float-btn{
