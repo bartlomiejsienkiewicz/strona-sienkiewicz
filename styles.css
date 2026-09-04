@@ -535,8 +535,8 @@ a:hover{ text-decoration:underline; text-underline-offset:3px; }
    PRZYCISKI PŁYWAJĄCE: „Do góry” i „Pokaż mniej”
    ============================================================ */
 .float-stack{
-  position:fixed; left:clamp(1rem,3vw,2rem); bottom:clamp(1rem,3vw,2rem);
-  display:flex; flex-direction:column; align-items:flex-start; gap:.7rem; z-index:60;
+  position:fixed; right:clamp(1rem,3vw,2rem); bottom:clamp(1rem,3vw,2rem);
+  display:flex; flex-direction:column; align-items:flex-end; gap:.7rem; z-index:60;
   pointer-events:none;
 }
 .float-btn{
