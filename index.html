@@ -569,18 +569,22 @@ function sortedArticles(){
     // Dopasuj szerokość widżetu Facebooka do faktycznej szerokości kontenera (min 280, max 500 — limity wtyczki FB),
     // żeby treść w środku iframe'a nigdy nie była szersza niż ramka, w której się wyświetla (co powodowało ucinanie z prawej strony).
     const w = Math.max(280, Math.min(500, Math.round(box.clientWidth) || 500));
-    // small_header=true — kompaktowy, jednowierszowy nagłówek (awatar + nazwa + przyciski obok siebie).
-    // Duży nagłówek (small_header=false) potrafi się źle składać przy niestandardowych szerokościach
-    // i ucinać liczbę obserwujących — kompaktowy wariant jest znacznie stabilniejszy.
+    // small_header=true — kompaktowy nagłówek. Ważne: NIE ustawiamy adapt_container_width=true —
+    // ten parametr każe wtyczce Facebooka samodzielnie, dynamicznie zmieniać swój wewnętrzny układ
+    // (wymaga do tego oficjalnego SDK Facebooka z obsługą komunikacji przez postMessage). Bez SDK
+    // ten mechanizm wchodzi w konflikt z naszym własnym, jednorazowym ustawieniem szerokości w JS —
+    // wnętrze iframe'a próbuje się przeliczyć na nowo, a sam iframe tego nie odzwierciedla, co
+    // powodowało nakładającą się, ucinaną treść. Ustawiamy więc szerokość raz, z naszej strony,
+    // i na tym poprzestajemy.
     const src = 'https://www.facebook.com/plugins/page.php'
       + '?href=' + encodeURIComponent(CONFIG.facebookPage)
-      + '&tabs=timeline&width=' + w + '&height=600&small_header=true'
-      + '&adapt_container_width=true&hide_cover=true&show_facepile=false';
+      + '&tabs=timeline&width=' + w + '&height=650&small_header=true'
+      + '&hide_cover=false&show_facepile=true';
     box.innerHTML = '';
     const ifr = document.createElement('iframe');
     ifr.src = src;
     ifr.width = w;
-    ifr.height = 600;
+    ifr.height = 650;
     ifr.title = 'Facebook — najnowsze wpisy';
     ifr.loading = 'lazy';
     ifr.setAttribute('allow', 'autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share');
