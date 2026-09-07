@@ -252,6 +252,17 @@ if(fs.existsSync(path.join(ROOT, 'og-image.jpg'))){
 if(fs.existsSync(path.join(ROOT, 'uploads'))){
   copyRecursive(path.join(ROOT, 'uploads'), path.join(DIST, 'uploads'));
 }
+// Pliki weryfikacyjne wyszukiwarek (Google Search Console, Bing Webmaster Tools itp.) —
+// wystarczy wrzucić taki plik do głównego folderu repozytorium na GitHubie, a przy
+// najbliższej publikacji sam trafi na stronę główną, bez zmian w tym skrypcie.
+// Google: plik w stylu googleXXXXXXXXXXXXXXXX.html
+// Bing:   plik w stylu BingSiteAuth.xml
+for(const f of fs.readdirSync(ROOT)){
+  if(/^google[0-9a-f]+\.html$/i.test(f) || f === 'BingSiteAuth.xml'){
+    copyRecursive(path.join(ROOT, f), path.join(DIST, f));
+    console.log('  + skopiowano plik weryfikacyjny:', f);
+  }
+}
 
 // 2) Podstrony artykułów, posortowane od najnowszego (do nawigacji poprzedni/następny)
 function parseDatePl(d){
