@@ -12,18 +12,26 @@
 # powinny trafiać do finalnej publikacji bez zmian — build.js już je kopiuje
 # do dist/, więc dodatkowych przekierowań nie potrzeba.
 
-# Nagłówki cache: pliki HTML zawsze świeże, reszta może być cache'owana dłużej
+# Nagłówki cache: pliki HTML zawsze świeże. CSS/JS krótko cache'owane (5 minut) —
+# na tyle krótko, żeby poprawki w kodzie były widoczne bez kłopotliwego czyszczenia
+# cache przez odwiedzających, a jednocześnie odciąża to trochę serwer przy zwykłym przeglądaniu.
 [[headers]]
   for = "/*.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+    # Nagłówki bezpieczeństwa — dodatkowa warstwa ochrony w przeglądarce odwiedzającego.
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
 [[headers]]
   for = "/styles.css"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=300, must-revalidate"
 
 [[headers]]
   for = "/common.js"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=300, must-revalidate"
