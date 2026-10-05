@@ -495,7 +495,8 @@ function sortedArticles(){
   // do prawdziwej, samodzielnej podstrony /blog/{slug}/ (dobrej dla SEO i udostępniania),
   // a nie do widoku wewnątrz jednej strony.
   function renderGrid(){
-    const list = sortedArticles();
+    // Najnowszy odcinek jest już w dużym kafelku powyżej, więc siatka zaczyna się od drugiego najnowszego.
+    const list = sortedArticles().slice(1);
     grid.innerHTML = list.map((a, i) => `
       <article class="post-card${(!gridExpanded && i >= GRID_PREVIEW_COUNT) ? ' is-hidden' : ''}">
         <div class="thumb" aria-hidden="true"></div>
