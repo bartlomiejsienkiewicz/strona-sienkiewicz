@@ -136,7 +136,7 @@
       "name": "Jakie są priorytety Bartłomieja Sienkiewicza w Parlamencie Europejskim?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Według strony są to: szczelne granice i ograniczenie nielegalnej migracji, bezpieczeństwo i walka z narkotykami, uczciwe rachunki bez kosztownej unijnej biurokracji klimatycznej oraz twarda polityka wobec Rosji i jej dezinformacji. Szczegóły znajdują się w sekcji „Obszary działania”."
+        "text": "Szczelne granice i ograniczenie nielegalnej migracji, bezpieczeństwo i walka z narkotykami, uczciwe rachunki bez kosztownej unijnej biurokracji klimatycznej oraz twarda polityka wobec Rosji i jej dezinformacji. Szczegóły znajdują się w sekcji „Obszary działania”."
       }
     },
     {
@@ -198,6 +198,7 @@
       <a href="#work">Praca w PE</a>
       <a href="#priorities">Priorytety</a>
       <a href="#blog">Blog</a>
+      <a href="#faq">FAQ</a>
       <a href="#contact">Kontakt</a>
     </nav>
   </div>
@@ -434,7 +435,7 @@
         <details><summary>W jakich komisjach Parlamentu Europejskiego zasiada Bartłomiej Sienkiewicz?</summary><p>Jest członkiem Komisji Spraw Konstytucyjnych (AFCO) oraz Komisji Specjalnej ds. Europejskiej Tarczy Demokracji, a także zastępcą członka Komisji Wolności Obywatelskich, Sprawiedliwości i Spraw Wewnętrznych (LIBE). Należy również do Delegacji do Komisji Współpracy Parlamentarnej UE–Rosja i Delegacji ds. stosunków z państwami Maghrebu.</p></details>
         <details><summary>Z jakiego okręgu został wybrany do Parlamentu Europejskiego?</summary><p>Został wybrany z listy Koalicji Obywatelskiej w okręgu obejmującym Małopolskę i Świętokrzyskie. Zasiada w Parlamencie Europejskim X kadencji, w Grupie Europejskiej Partii Ludowej (EPL).</p></details>
         <details><summary>Czym jest „Polityka pod Dywanem”?</summary><p>To program i blog Bartłomieja Sienkiewicza o tym, co ważnego dzieje się w Unii Europejskiej, skąd „wieją wiatry” w Europie i co słychać w polskiej polityce. Nazwa pochodzi od wschodniego dywanu w brukselskim biurze. Odcinki ukazują się zwykle w czwartki na kanale YouTube @bsienkiewicz, a na tej stronie każdy z nich ma wersję pisemną.</p></details>
-        <details><summary>Jakie są priorytety Bartłomieja Sienkiewicza w Parlamencie Europejskim?</summary><p>Według strony są to: szczelne granice i ograniczenie nielegalnej migracji, bezpieczeństwo i walka z narkotykami, uczciwe rachunki bez kosztownej unijnej biurokracji klimatycznej oraz twarda polityka wobec Rosji i jej dezinformacji. Szczegóły znajdują się w sekcji „Obszary działania”.</p></details>
+        <details><summary>Jakie są priorytety Bartłomieja Sienkiewicza w Parlamencie Europejskim?</summary><p>Szczelne granice i ograniczenie nielegalnej migracji, bezpieczeństwo i walka z narkotykami, uczciwe rachunki bez kosztownej unijnej biurokracji klimatycznej oraz twarda polityka wobec Rosji i jej dezinformacji. Szczegóły znajdują się w sekcji „Obszary działania”.</p></details>
         <details><summary>Jak skontaktować się z biurem posła?</summary><p>Biura w Parlamencie Europejskim działają w Brukseli i Strasburgu, a biura lokalne w Krakowie i Tarnowie. Adresy i dane kontaktowe są w sekcji „Kontakt”. Aby umówić się na spotkanie, należy napisać na adres biura właściwego dla swojej okolicy.</p></details>
       </div>
     </div>
@@ -656,21 +657,21 @@ function sortedArticles(){
 
   /* ---------------- Active nav highlight (podświetlanie sekcji w menu) ---------------- */
   const nav = document.getElementById('primary-nav');
-  const sections = ['about','facebook','work','priorities','blog','contact'].map(id => document.getElementById(id)).filter(Boolean);
+  const sections = ['about','facebook','work','priorities','blog','faq','contact'].map(id => document.getElementById(id)).filter(Boolean);
   const navLinks = {};
   nav.querySelectorAll('a[href^="#"]').forEach(a => { navLinks[a.getAttribute('href').slice(1)] = a; });
-  if('IntersectionObserver' in window){
-    const spy = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if(e.isIntersecting){
-          Object.values(navLinks).forEach(l => l.classList.remove('is-active'));
-          const link = navLinks[e.target.id];
-          if(link) link.classList.add('is-active');
-        }
-      });
-    }, { threshold:.5 });
-    sections.forEach(s => spy.observe(s));
+  // Aktywna jest ostatnia sekcja, której górna krawędź minęła linię na ok. 35% wysokości okna.
+  // (Stabilniejsze niż próg widoczności przy krótkich sekcjach, np. FAQ tuż przed Kontaktem.)
+  function updateActiveNav(){
+    const line = window.innerHeight * 0.35;
+    let current = null;
+    sections.forEach(s => { if(s.getBoundingClientRect().top <= line) current = s; });
+    Object.values(navLinks).forEach(l => l.classList.remove('is-active'));
+    if(current && navLinks[current.id]) navLinks[current.id].classList.add('is-active');
   }
+  window.addEventListener('scroll', updateActiveNav, { passive:true });
+  window.addEventListener('resize', updateActiveNav);
+  updateActiveNav();
 
   /* ================================================================
      FACEBOOK — okno strony (page plugin)
