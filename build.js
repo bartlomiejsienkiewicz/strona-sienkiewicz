@@ -65,6 +65,12 @@ function escapeXml(s){
 function escapeHtmlAttr(s){
   return String(s || '').replace(/"/g, '&quot;');
 }
+function escapeHtml(s){
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function ldJson(obj){
+  return JSON.stringify(obj).replace(/</g, '\\u003c');
+}
 function stripTags(html){
   return String(html || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 }
@@ -95,7 +101,7 @@ let footerHtml = extractBetween(sourceHtml, '<!-- ======================= FOOTER
 function toHomeLinks(html){
   return html
     .replace(/href="#landing"/g, 'href="/"')
-    .replace(/href="#(about|work|priorities|blog|contact)"/g, 'href="/#$1"');
+    .replace(/href="#(about|facebook|work|priorities|blog|faq|contact)"/g, 'href="/#$1"');
 }
 headerHtml = toHomeLinks(headerHtml);
 footerHtml = toHomeLinks(footerHtml);
@@ -118,14 +124,16 @@ function articlePage(article, prevNext){
 
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'Article',
+    '@type': 'BlogPosting',
     headline: article.title,
     description,
     inLanguage: 'pl-PL',
     url,
-    ...(isoDate ? { datePublished: isoDate } : {}),
-    author: { '@type': 'Person', name: config.authorName, url: `${SITE_URL}/` },
-    publisher: { '@type': 'Person', name: config.authorName },
+    image: `${SITE_URL}/og-image.jpg`,
+    wordCount: stripTags(article.body).split(' ').filter(Boolean).length,
+    ...(isoDate ? { datePublished: isoDate, dateModified: isoDate } : {}),
+    author: { '@type': 'Person', '@id': `${SITE_URL}/#person`, name: config.authorName, url: `${SITE_URL}/` },
+    publisher: { '@type': 'Person', '@id': `${SITE_URL}/#person`, name: config.authorName },
     isPartOf: { '@type': 'Blog', name: config.podcastName, url: `${SITE_URL}/#blog` },
     mainEntityOfPage: { '@type': 'WebPage', '@id': url }
   };
@@ -161,6 +169,7 @@ function articlePage(article, prevNext){
 <meta property="og:image" content="${SITE_URL}/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${escapeHtmlAttr(config.authorName)} — ${escapeHtmlAttr(config.podcastName)}">
 ${isoDate ? `<meta property="article:published_time" content="${isoDate}">\n` : ''}<meta property="article:author" content="${escapeHtmlAttr(config.authorName)}">
 
 <meta name="twitter:card" content="summary_large_image">
@@ -176,8 +185,8 @@ ${isoDate ? `<meta property="article:published_time" content="${isoDate}">\n` : 
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css">
 
-<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
-<script type="application/ld+json">${JSON.stringify(breadcrumbLd)}</script>
+<script type="application/ld+json">${ldJson(jsonLd)}</script>
+<script type="application/ld+json">${ldJson(breadcrumbLd)}</script>
 </head>
 <body>
 <a class="skip" href="#article-content">Przejdź do treści</a>
@@ -236,9 +245,77 @@ ${floatButtonsHtml}
 rimraf(DIST);
 fs.mkdirSync(DIST, { recursive:true });
 
+function parseDatePl(d){
+  const m = String(d || '').trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if(!m) return -1;
+  return new Date(+m[3], +m[2]-1, +m[1]).getTime();
+}
+const sorted = [...articles].sort((a,b) => parseDatePl(b.date) - parseDatePl(a.date));
+
+/* ---------------------------------------------------------------------------
+   Strona główna: lista odcinków wstawiona statycznie do HTML.
+   Wcześniej wpisy pojawiały się dopiero po wykonaniu JavaScriptu, więc roboty
+   (w tym wyszukiwarki AI) nie widziały linków do odcinków ze strony głównej.
+   Skrypt w index.html nadal renderuje tę samą listę po załadowaniu strony.
+--------------------------------------------------------------------------- */
+const GRID_PREVIEW_COUNT = 3;
+function prerenderHome(html){
+  const list = sorted.filter(a => a.slug && a.title);
+  if(!list.length) return html;
+  const latest = list[0];
+  const rest = list.slice(1);
+  const dateOf = a => (a.date && !/PLACEHOLDER/i.test(a.date)) ? a.date : '';
+  let out = html;
+  function swap(re, fn, label){
+    if(!re.test(out)){ console.warn('UWAGA: nie znaleziono fragmentu strony głównej:', label); return; }
+    out = out.replace(re, fn);
+  }
+  swap(/id="featured-episode" href="#"/, () => `id="featured-episode" href="/blog/${latest.slug}/"`, 'featured link');
+  swap(/(<p class="f-meta" id="featured-episode-date">)<\/p>/, (m,a) => `${a}${escapeHtml(dateOf(latest))}</p>`, 'featured date');
+  swap(/(<h3 id="featured-episode-title">)<\/h3>/, (m,a) => `${a}${escapeHtml(latest.title)}</h3>`, 'featured title');
+  swap(/(<p class="f-excerpt" id="featured-episode-excerpt">)<\/p>/, (m,a) => `${a}${escapeHtml(latest.excerpt)}</p>`, 'featured excerpt');
+  const cards = rest.map((a, i) => `
+      <article class="post-card${i >= GRID_PREVIEW_COUNT ? ' is-hidden' : ''}">
+        <div class="thumb" aria-hidden="true"></div>
+        <div class="body">
+          ${dateOf(a) ? `<p class="post-meta"><span class="ph">${escapeHtml(dateOf(a))}</span></p>` : ''}
+          <h3>${escapeHtml(a.title)}</h3>
+          <p>${escapeHtml(a.excerpt)}</p>
+          <a class="read-more" href="/blog/${a.slug}/">Czytaj więcej</a>
+        </div>
+      </article>`).join('');
+  swap(/(<div class="post-grid" id="post-grid">)[\s\S]*?(<\/div>\s*<div class="grid-toggle-wrap" id="grid-toggle-wrap")/,
+       (m,a,b) => `${a}${cards}\n      ${b}`, 'post grid');
+  if(rest.length > GRID_PREVIEW_COUNT){
+    swap(/>Pokaż więcej odcinków<\/button>/, () => `>Pokaż więcej odcinków (${rest.length - GRID_PREVIEW_COUNT})</button>`, 'toggle');
+  } else {
+    swap(/<div class="grid-toggle-wrap" id="grid-toggle-wrap">/, () => '<div class="grid-toggle-wrap" id="grid-toggle-wrap" style="display:none">', 'toggle wrap');
+  }
+  // Dane strukturalne bloga (lista wpisów) – dla Google i wyszukiwarek AI
+  const blogLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Blog',
+    '@id': `${SITE_URL}/#blog`,
+    name: config.podcastName,
+    url: `${SITE_URL}/#blog`,
+    inLanguage: 'pl-PL',
+    author: { '@id': `${SITE_URL}/#person` },
+    blogPost: list.map(a => ({
+      '@type': 'BlogPosting',
+      headline: a.title,
+      url: `${SITE_URL}/blog/${a.slug}/`,
+      ...(toIsoDate(a.date) ? { datePublished: toIsoDate(a.date) } : {}),
+      description: a.excerpt || undefined
+    }))
+  };
+  out = out.replace('<!-- Dane strukturalne: lista wpisów bloga dodawana automatycznie przez build.js -->',
+    `<script type="application/ld+json">${ldJson(blogLd)}</script>`);
+  return out;
+}
+
 // 1) Strona główna, style, favicon, dane, panel admina — kopiowane 1:1
 //    (z podmianą %%SITE_URL%% na prawdziwy adres z site.config.json)
-let homeHtml = sourceHtml.split('%%SITE_URL%%').join(SITE_URL);
+let homeHtml = prerenderHome(sourceHtml).split('%%SITE_URL%%').join(SITE_URL);
 writeFile('index.html', homeHtml);
 copyRecursive(path.join(ROOT, 'styles.css'), path.join(DIST, 'styles.css'));
 copyRecursive(path.join(ROOT, 'common.js'), path.join(DIST, 'common.js'));
@@ -265,12 +342,6 @@ for(const f of fs.readdirSync(ROOT)){
 }
 
 // 2) Podstrony artykułów, posortowane od najnowszego (do nawigacji poprzedni/następny)
-function parseDatePl(d){
-  const m = String(d || '').trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
-  if(!m) return -1;
-  return new Date(+m[3], +m[2]-1, +m[1]).getTime();
-}
-const sorted = [...articles].sort((a,b) => parseDatePl(b.date) - parseDatePl(a.date));
 
 let generated = 0;
 sorted.forEach((article, i) => {
@@ -285,7 +356,7 @@ sorted.forEach((article, i) => {
 
 // 3) sitemap.xml
 const urls = [
-  { loc: `${SITE_URL}/`, priority: '1.0' },
+  { loc: `${SITE_URL}/`, lastmod: (sorted[0] && toIsoDate(sorted[0].date)) || undefined, priority: '1.0' },
   ...sorted.filter(a => a.slug).map(a => ({
     loc: `${SITE_URL}/blog/${a.slug}/`,
     lastmod: toIsoDate(a.date) || undefined,
@@ -310,5 +381,27 @@ Disallow: /admin/
 Sitemap: ${SITE_URL}/sitemap.xml
 `);
 
-console.log(`✔ Zbudowano stronę: ${generated} podstron artykułów, sitemap.xml, robots.txt.`);
+// 5) llms.txt — zwięzły opis strony i spis odcinków dla robotów AI (wyszukiwarki odpowiedzi)
+const llmsLines = [
+  `# ${config.authorName} — poseł do Parlamentu Europejskiego`,
+  '',
+  `> Oficjalna strona posła do Parlamentu Europejskiego Bartłomieja Sienkiewicza (X kadencja, Grupa EPL, Koalicja Obywatelska, okręg Małopolska i Świętokrzyskie), oraz blog „${config.podcastName}” z pisemnymi wersjami odcinków programu.`,
+  '',
+  '## Najważniejsze informacje',
+  '- Komisje: Komisja Spraw Konstytucyjnych (AFCO, członek); Komisja Specjalna ds. Europejskiej Tarczy Demokracji (członek); Komisja Wolności Obywatelskich, Sprawiedliwości i Spraw Wewnętrznych (LIBE, zastępca członka).',
+  '- Delegacje: do Komisji Współpracy Parlamentarnej UE–Rosja; ds. stosunków z państwami Maghrebu.',
+  `- Strona główna: ${SITE_URL}/`,
+  '- Profil w Parlamencie Europejskim: https://www.europarl.europa.eu/meps/en/86057',
+  '- Kanał YouTube programu: https://www.youtube.com/@bsienkiewicz',
+  '',
+  `## Blog „${config.podcastName}” (od najnowszego)`,
+  ...sorted.filter(a => a.slug && a.title).map(a => {
+    const ex = (a.excerpt || '').replace(/\s+/g, ' ').trim();
+    return `- [${a.title}](${SITE_URL}/blog/${a.slug}/)${a.date ? ' (' + a.date + ')' : ''}${ex ? ': ' + ex : ''}`;
+  }),
+  ''
+];
+writeFile('llms.txt', llmsLines.join('\n'));
+
+console.log(`✔ Zbudowano stronę: ${generated} podstron artykułów, sitemap.xml, robots.txt, llms.txt.`);
 console.log(`  Wyjście: ${DIST}`);
